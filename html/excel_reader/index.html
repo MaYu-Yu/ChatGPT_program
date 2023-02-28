@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Excel表格生成</title>
+</head>
+<body>
+    <input type="file" id="input" accept=".xlsx,.xls" style="display:none">
+    <button onclick="loadExcel()">選擇檔案</button>
+    <br><br>
+    <table id="table">
+        <thead>
+            <tr>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+        function loadExcel() {
+            var input = document.getElementById('input');
+            input.click();
+            input.onchange = function(event) {
+                var file = event.target.files[0];
+                var reader = new FileReader();
+                reader.readAsBinaryString(file);
+                reader.onload = function(event) {
+                    var data = event.target.result;
+                    var workbook = XLSX.read(data, { type: 'binary' });
+                    var sheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[sheetName];
+                    var table = document.getElementById('table');
+                    var range = XLSX.utils.decode_range(worksheet['!ref']);
+                    var html = '<thead><tr>';
+                    for (var C = range.s.c; C <= range.e.c; ++C) {
+                        var cell = worksheet[XLSX.utils.encode_cell({ c: C, r: range.s.r })];
+                        if (cell) {
+                            html += '<th>' + cell.v + '</th>';
+                        } else {
+                            html += '<th></th>';
+                        }
+                    }
+                    html += '</tr></thead><tbody>';
+                    for (var R = range.s.r + 1; R <= range.e.r; ++R) {
+                        html += '<tr>';
+                        for (var C = range.s.c; C <= range.e.c; ++C) {
+                            var cell = worksheet[XLSX.utils.encode_cell({ c: C, r: R })];
+                            if (cell) {
+                                html += '<td>' + cell.v + '</td>';
+                            } else {
+                                html += '<td></td>';
+                            }
+                        }
+                        html += '</tr>';
+                    }
+                    html += '</tbody>';
+                    table.innerHTML = html;
+                };
+            };
+        }
+    </script>
+</body>
+</html>
