@@ -55,7 +55,7 @@ app.post('/to_db', upload.single('image'), (req, res) => {
     {
       title: title,
       content: content,
-      image_path: image_path,
+      image_path: null,
       created_at: created_at
     },
     (error, results) => {
